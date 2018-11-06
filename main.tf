@@ -46,7 +46,7 @@ resource "google_storage_bucket" "logging" {
   name          = "${local.log_bucket_name}"
   location      = "${var.location != "" ? var.location : data.google_client_config.current.region}"
   project       = "${var.project != "" ? var.project : data.google_client_config.current.project}"
-  storage_class = "REGIONAL"
+  storage_class = "${var.storage_class}"
   force_destroy = "${var.force_destroy}"
   labels        = "${var.labels}"
 
@@ -61,7 +61,7 @@ resource "google_storage_bucket" "logging" {
     }
 
     "condition" {
-      age = 60
+      age = 3600
     }
   }
 }
