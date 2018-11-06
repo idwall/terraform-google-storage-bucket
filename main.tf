@@ -26,7 +26,7 @@ resource "google_storage_bucket" "bucket" {
 
   # TODO Should be set to "${var.prevent_destroy}" once https://github.com/hashicorp/terraform/issues/3116 is fixed.
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   lifecycle_rule = "${var.lifecycle_rules}"
@@ -52,7 +52,7 @@ resource "google_storage_bucket" "logging" {
 
   # TODO Should be set to "${var.prevent_destroy}" once https://github.com/hashicorp/terraform/issues/3116 is fixed.
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
   lifecycle_rule {
