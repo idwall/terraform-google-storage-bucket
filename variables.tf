@@ -1,4 +1,5 @@
-variable "bucket_name" {
+variable "names" {
+  type        = "list"
   description = "The name of the bucket"
 }
 
@@ -31,9 +32,9 @@ variable "labels" {
   }
 }
 
-variable "versioning_enabled" {
+variable "versioning" {
   description = "While set to true, versioning is fully enabled for this bucket."
-  default     = true
+  default     = false
 }
 
 variable "lifecycle_rules" {
@@ -42,7 +43,7 @@ variable "lifecycle_rules" {
   default     = []
 }
 
-variable "logging_enabled" {
+variable "logging" {
   description = "When set to true, enable the bucket's Access and Storage Logs configuration and create a storage_bucket for them."
   default     = false
 }
@@ -53,7 +54,7 @@ variable "default_acl" {
   default     = "projectPrivate"
 }
 
-variable "role_entity" {
+variable "roles" {
   description = "List of role/entity pairs in the form ROLE:entity. See https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls for more details."
   type        = "list"
   default     = []

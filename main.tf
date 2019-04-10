@@ -1,9 +1,9 @@
 # Versioning
 terraform {
-  required_version = ">= 0.11.8"
+  required_version = ">= 0.11.13"
 
   required_providers {
-    google = ">= 1.14.0"
+    google = ">= 2.3.0"
   }
 }
 
@@ -11,13 +11,11 @@ terraform {
 data "google_client_config" "current" {}
 
 # Set the log bucket name
-locals {
-  log_bucket_name = "${var.bucket_name}_logs"
-}
 
 # Storage Bucket
 resource "google_storage_bucket" "bucket" {
-  name          = "${var.bucket_name}"
+  count         = "${length(var.names)}"
+  name          = "${var.names[count.index]}"
   location      = "${var.location != "" ? var.location : data.google_client_config.current.region}"
   project       = "${var.project != "" ? var.project : data.google_client_config.current.project}"
   storage_class = "${var.storage_class}"
@@ -32,18 +30,18 @@ resource "google_storage_bucket" "bucket" {
   lifecycle_rule = "${var.lifecycle_rules}"
 
   logging {
-    log_bucket = "${local.log_bucket_name}"
+    log_bucket = "${var.names[count.index]}_logs"
   }
 
   versioning {
-    enabled = "${var.versioning_enabled}"
+    enabled = "${var.versioning}"
   }
 }
 
 # Logging for Storage Bucket
 resource "google_storage_bucket" "logging" {
-  count         = "${var.logging_enabled}"
-  name          = "${local.log_bucket_name}"
+  count         = "${var.logging ? length(google_storage_bucket.bucket.*.name) : 0}"
+  name          = "${google_storage_bucket.bucket.*.name[count.index]}_logs"
   location      = "${var.location != "" ? var.location : data.google_client_config.current.region}"
   project       = "${var.project != "" ? var.project : data.google_client_config.current.project}"
   storage_class = "${var.storage_class}"
@@ -68,21 +66,22 @@ resource "google_storage_bucket" "logging" {
 
 # Bucket ACL
 resource "google_storage_bucket_acl" "bucket_acl" {
-  bucket      = "${google_storage_bucket.bucket.name}"
+  count       = "${length(google_storage_bucket.bucket.*.name)}"
+  bucket      = "${google_storage_bucket.bucket.*.name[count.index]}"
   default_acl = "${var.default_acl}"
 
   role_entity = [
-    "${var.role_entity}",
+    "${var.roles}",
   ]
 }
 
 # Log Bucket ACL
 resource "google_storage_bucket_acl" "log_bucket_acl" {
-  count       = "${var.logging_enabled}"
-  bucket      = "${google_storage_bucket.logging.name}"
+  count       = "${var.logging ? length(google_storage_bucket.bucket.*.name) : 0}"
+  bucket      = "${google_storage_bucket.logging.*.name[count.index]}"
   default_acl = "${var.default_acl}"
 
   role_entity = [
-    "${var.role_entity}",
+    "${var.roles}",
   ]
 }
