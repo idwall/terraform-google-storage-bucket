@@ -22,7 +22,7 @@ module "my_bucket" {
   versioning         = true
 
   labels = {
-    "managed-by" = "terraform"
+    "provisioner" = "terraform"
   }
 
   lifecycle_rules = [{
@@ -40,10 +40,11 @@ module "my_bucket" {
     }]
   }]
 
-  roles = [
-    "OWNER:project-owners-${var.project}",
-    "WRITER:project-editors-${var.project}",
-    "READER:project-viewers-${var.project}"
+  role = storage.objectCreator
+
+  members = [
+    "serviceAccount:service@service.com",
+    "user:user@user.com"
   ]
 }
 ```
@@ -61,28 +62,30 @@ data "terraform_remote_state" "gcs_bucket" {
 }
 ```
 
-| Name             | Description                                                                                                                                     |  Type  |      Default       | Required |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | :----: | :----------------: | :------: |
-| default\_acl     | Configure this ACL to be the default ACL. See https://cloud.google.com/storage/docs/access-control/lists for more details.                      | string | `"projectPrivate"` |    no    |
-| force\_destroy   | When deleting a bucket, this boolean option will delete all contained objects.                                                                  | string |     `"false"`      |    no    |
-| labels           | A set of key/value label pairs to assign to the bucket.                                                                                         |  map   |      `<map>`       |    no    |
-| lifecycle\_rules | The bucket's Lifecycle Rules configuration. See README for examples                                                                             |  list  |      `<list>`      |    no    |
-| location         | The GCS location. If it is not provided, the region configured in the gcloud client is used.                                                    | string |        `""`        |    no    |
-| logging          | When set to true, enable the bucket's Access and Storage Logs configuration and create a storage_bucket for them.                               | string |     `"false"`      |    no    |
-| names            | The name of the bucket                                                                                                                          |  list  |        n/a         |   yes    |
-| project          | The ID of the google project to which the resource belongs. If it is not provided, the project configured in the gcloud client is used.         | string |        `""`        |    no    |
-| roles            | List of role/entity pairs in the form ROLE:entity. See https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls for more details. |  list  |      `<list>`      |    no    |
-| storage\_class   | The Storage Class of the new bucket. Supported values are: MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE.                                        | string |    `"REGIONAL"`    |    no    |
-| versioning       | While set to true, versioning is fully enabled for these buckets.                                                                                 | string |     `"false"`      |    no    |
+## Inputs
+
+| Name             | Description                                                                                                                             |  Type  |     Default     | Required |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- | :----: | :-------------: | :------: |
+| force\_destroy   | When deleting a bucket, this boolean option will delete all contained objects.                                                          | string |    `"false"`    |    no    |
+| labels           | A set of key/value label pairs to assign to the bucket.                                                                                 |  map   |     `<map>`     |    no    |
+| lifecycle\_rules | The bucket's Lifecycle Rules configuration. See README for examples                                                                     |  list  |    `<list>`     |    no    |
+| location         | The GCS location. If it is not provided, the region configured in the gcloud client is used.                                            | string |      `""`       |    no    |
+| logging          | When set to true, enable the bucket's Access and Storage Logs configuration and create a storage_bucket for them.                       | string |    `"false"`    |    no    |
+| members          | List of members added to the created buckets.                                                                                           |  list  |    `<list>`     |    no    |
+| names            | The name of the bucket                                                                                                                  |  list  |       n/a       |   yes    |
+| project          | The ID of the google project to which the resource belongs. If it is not provided, the project configured in the gcloud client is used. | string |      `""`       |    no    |
+| role             | Default buket role for the bucket member.                                                                                               | string | `"storage.get"` |    no    |
+| storage\_class   | The Storage Class of the new bucket. Supported values are: MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE.                                | string |  `"REGIONAL"`   |    no    |
+| versioning       | While set to true, versioning is fully enabled for this bucket.                                                                         | string |    `"false"`    |    no    |
 
 ## Outputs
 
-| Name              | Description                                                    |
-| ----------------- | -------------------------------------------------------------- |
-| bucket\_names     | List of generated buckets.                                     |
-| log\_bucket\_name | List of generated log buckets.                                 |
-| self\_link        | The URI of the created resources.                              |
-| url               | The base URL of the buckets, in the format gs://<bucket-name>. |
+| Name              | Description                                                   |
+| ----------------- | ------------------------------------------------------------- |
+| bucket\_names     | The name of bucket.                                           |
+| log\_bucket\_name | The name of the access log bucket.                            |
+| self\_link        | The URI of the created resource.                              |
+| url               | The base URL of the bucket, in the format gs://<bucket-name>. |
 
 ## Links
 

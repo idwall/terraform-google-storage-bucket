@@ -49,13 +49,14 @@ variable "logging" {
 }
 
 # ACLs
-variable "default_acl" {
-  description = "Configure this ACL to be the default ACL. See https://cloud.google.com/storage/docs/access-control/lists for more details."
-  default     = "projectPrivate"
-}
-
-variable "roles" {
-  description = "List of role/entity pairs in the form ROLE:entity. See https://cloud.google.com/storage/docs/json_api/v1/bucketAccessControls for more details."
+variable "members" {
+  description = "List of members added to the created buckets."
   type        = "list"
   default     = []
+}
+
+variable "role" {
+  description = "Default buket role for the bucket member."
+  type        = "string"
+  default     = "storage.get"
 }

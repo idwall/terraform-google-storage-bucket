@@ -65,23 +65,12 @@ resource "google_storage_bucket" "logging" {
 }
 
 # Bucket ACL
-resource "google_storage_bucket_acl" "bucket_acl" {
-  count       = "${length(google_storage_bucket.bucket.*.name)}"
-  bucket      = "${google_storage_bucket.bucket.*.name[count.index]}"
-  default_acl = "${var.default_acl}"
+resource "google_storage_bucket_iam_binding" "binding" {
+  count  = "${length(var.members) > 0 ? 1 : 0}"
+  bucket = "${google_storage_bucket.bucket.*.name[count.index]}"
+  role   = "roles/${var.role}"
 
-  role_entity = [
-    "${var.roles}",
-  ]
-}
-
-# Log Bucket ACL
-resource "google_storage_bucket_acl" "log_bucket_acl" {
-  count       = "${var.logging ? length(google_storage_bucket.bucket.*.name) : 0}"
-  bucket      = "${google_storage_bucket.logging.*.name[count.index]}"
-  default_acl = "${var.default_acl}"
-
-  role_entity = [
-    "${var.roles}",
+  members = [
+    "${var.members}",
   ]
 }
