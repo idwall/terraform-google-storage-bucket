@@ -28,7 +28,7 @@ variable "labels" {
   type        = "map"
 
   default = {
-    "managed-by" = "terraform"
+    "provisioner" = "terraform"
   }
 }
 
